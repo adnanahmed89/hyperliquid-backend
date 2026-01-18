@@ -84,7 +84,7 @@ const HyperliquidMonitor = () => {
       if (websocket) websocket.close();
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
     };
-  }, [isLive, BACKEND_WS_URL]);
+  }, [isLive]);
 
   const copyToClipboard = (wallet) => {
     navigator.clipboard.writeText(wallet);
