@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, Wallet, Copy, Check, AlertCircle } from 'lucide-react';
 
 const HyperliquidMonitor = () => {
@@ -6,16 +6,17 @@ const HyperliquidMonitor = () => {
   const [isLive, setIsLive] = useState(true);
   const [copiedWallet, setCopiedWallet] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('connecting');
-  const [ws, setWs] = useState(null);
 
   const BACKEND_WS_URL = 'wss://hyperliquid-backend-7cqm.onrender.com';
 
+  const copyToClipboard = useCallback((wallet) => {
+    navigator.clipboard.writeText(wallet);
+    setCopiedWallet(wallet);
+    setTimeout(() => setCopiedWallet(null), 2000);
+  }, []);
+
   useEffect(() => {
     if (!isLive) {
-      if (ws) {
-        ws.close();
-        setWs(null);
-      }
       return;
     }
 
@@ -69,8 +70,6 @@ const HyperliquidMonitor = () => {
           setConnectionStatus('reconnecting');
           reconnectTimeout = setTimeout(connect, 5000);
         };
-
-        setWs(websocket);
       } catch (error) {
         console.error('Connection error:', error);
         setConnectionStatus('error');
@@ -84,13 +83,7 @@ const HyperliquidMonitor = () => {
       if (websocket) websocket.close();
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
     };
-  }, [isLive]);
-
-  const copyToClipboard = (wallet) => {
-    navigator.clipboard.writeText(wallet);
-    setCopiedWallet(wallet);
-    setTimeout(() => setCopiedWallet(null), 2000);
-  };
+  }, [isLive, BACKEND_WS_URL]);
 
   const getStatusColor = () => {
     switch (connectionStatus) {
